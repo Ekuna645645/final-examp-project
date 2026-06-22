@@ -4,19 +4,18 @@ plugins {
     id("org.jetbrains.kotlin.plugin.compose")
 }
 
-// The Google Services (Firebase) plugin is applied only when google-services.json
-// is present. This lets the project compile before Firebase is configured; once you
-// drop the real google-services.json into app/, Firebase wiring activates automatically.
+// Applied only when google-services.json is present, so the project compiles before
+// Firebase is configured. Drop the real file into app/ and Firebase wiring activates.
 if (project.file("google-services.json").exists()) {
     apply(plugin = "com.google.gms.google-services")
 }
 
 android {
-    namespace = "ge.btu.habittracker"
+    namespace = "ge.btu.flowershop"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "ge.btu.habittracker"
+        applicationId = "ge.btu.flowershop"
         minSdk = 24
         targetSdk = 35
         versionCode = 1
@@ -29,7 +28,7 @@ android {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                "proguard-rules.pro",
             )
         }
     }
@@ -52,7 +51,6 @@ android {
 }
 
 dependencies {
-    // Compose Bill of Materials keeps all Compose artifacts on compatible versions.
     val composeBom = platform("androidx.compose:compose-bom:2024.10.01")
     implementation(composeBom)
     androidTestImplementation(composeBom)
@@ -60,22 +58,31 @@ dependencies {
     // Core / lifecycle / activity
     implementation("androidx.core:core-ktx:1.13.1")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.6")
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.6")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.6")
     implementation("androidx.activity:activity-compose:1.9.3")
 
-    // Jetpack Compose UI + Material 3
+    // Compose UI + Material 3
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
     implementation("androidx.compose.material:material-icons-extended")
 
-    // Navigation Compose powers the bottom-navigation menu
+    // Navigation Compose
     implementation("androidx.navigation:navigation-compose:2.8.3")
 
-    // Firebase Realtime Database (the cloud data layer)
+    // Firebase: Auth, Firestore, Storage
     implementation(platform("com.google.firebase:firebase-bom:33.5.1"))
-    implementation("com.google.firebase:firebase-database-ktx")
+    implementation("com.google.firebase:firebase-auth-ktx")
+    implementation("com.google.firebase:firebase-firestore-ktx")
+    implementation("com.google.firebase:firebase-storage-ktx")
+
+    // Google Sign-In
+    implementation("com.google.android.gms:play-services-auth:21.2.0")
+
+    // Image loading
+    implementation("io.coil-kt:coil-compose:2.7.0")
 
     // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")

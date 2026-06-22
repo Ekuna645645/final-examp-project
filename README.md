@@ -1,163 +1,92 @@
-# Habit Tracker — Android (Jetpack Compose + Firebase)
+# Bloom — Flower Delivery Marketplace (Android)
 
 > Final project for **Mobile Application Development (Android)**, BTU.
-> A daily habit/reminder tracker built 100% in **Kotlin + Jetpack Compose** with an
-> **MVVM** architecture and a **Firebase Realtime Database** backend.
+> A multi-role flower-shop & delivery app built 100% in **Kotlin + Jetpack Compose**,
+> **MVVM**, with **Firebase** (Auth, Firestore, Storage) and **Stripe** test payments.
 
-**მოკლე აღწერა (KA):** აპლიკაცია გეხმარება ყოველდღიური ჩვევების შექმნაში — ამატებ ჩვევას,
-ნიშნავ შესრულებულად, ადევნებ თვალს სტრიქს (streak) და აყენებ ყოველდღიურ ლოკალურ
-შეხსენებას (ნოტიფიკაციას). მონაცემები ინახება Firebase Realtime Database-ში.
+**მოკლე აღწერა (KA):** ყვავილების მაღაზიის აპლიკაცია სამი როლით — **მომხმარებელი**
+ყიდულობს ყვავილებს და ადევნებს თვალს შეკვეთას, **კურიერი** იღებს და აწვდის შეკვეთებს,
+**ადმინი** მართავს პროდუქტებს, მომხმარებლებსა და სტატისტიკას. ავტორიზაცია — email/Google,
+მონაცემები — Firebase Firestore, გადახდა — Stripe (test mode).
 
 ---
 
-## ✨ Features
+## 👥 Roles
 
-| Requirement | How it's implemented |
+| Role | Can do |
 |---|---|
-| **Menu** | Material 3 **bottom-navigation bar** with three tabs (Today / Habits / Stats), powered by Navigation Compose. |
-| **List** | `LazyColumn` lists of habits on every tab. |
-| **MVVM architecture** | Composable screens observe a `StateFlow` exposed by `HabitViewModel`, which talks to a `HabitRepository`. |
-| **Database connection** | **Firebase Realtime Database** — real-time, cloud-synced storage with offline persistence. |
-| **A feature not used before** | **Scheduled local notifications** — each habit can have a daily reminder delivered via `AlarmManager` + `BroadcastReceiver` + `NotificationManager`. |
-| **README** | This file. |
-| **No XML UI / no `findViewById`** | The entire UI is Jetpack Compose. There is not a single layout XML or `findViewById` call in the project. |
+| **Customer** | Browse flowers, add to cart, set delivery address, pay (Stripe test), track current orders, see order history, file complaint tickets |
+| **Courier** | See available orders, accept, pick up from storage, mark delivered *(live map tracking + chat: later phase)* |
+| **Admin** | Manage products (CRUD + images), manage users, see live orders, view statistics dashboard, handle complaint tickets |
 
-### What the app does
-- **Today** – the habits for today with a checkbox to mark them done and a daily progress bar.
-- **Habits** – create, edit and delete habits. Each habit has a name, description, icon, color and an optional daily reminder time. Add via the floating **+** button.
-- **Stats** – an overall summary (done today, best streak, total check-ins) plus a per-habit **last-7-days strip** and current streak.
-- **Reminders** – when a habit's reminder is on, the app schedules a repeating daily alarm that posts a local notification at the chosen time.
+After sign-in, the app reads `users/{uid}.role` from Firestore and routes to the matching experience.
 
 ---
 
 ## 🧱 Tech stack
 
-- **Language:** Kotlin
-- **UI:** Jetpack Compose, Material 3 (dynamic color on Android 12+)
-- **Architecture:** MVVM (View → ViewModel → Repository → Firebase)
-- **Async:** Kotlin Coroutines + Flow (`callbackFlow`, `StateFlow`)
-- **Navigation:** Navigation Compose
-- **Backend:** Firebase Realtime Database (with offline persistence)
-- **Notifications:** `AlarmManager`, `BroadcastReceiver`, `NotificationCompat`
-- **Min SDK:** 24 · **Target/Compile SDK:** 35 · **JDK:** 17 · **AGP:** 8.7 · **Gradle:** 8.9
+- **Language:** Kotlin · **UI:** Jetpack Compose + Material 3 (no XML layouts, no `findViewById`)
+- **Architecture:** MVVM (Composable → ViewModel/StateFlow → Repository → Firebase)
+- **Auth:** Firebase Authentication (Email/Password + Google)
+- **Database:** Cloud Firestore (users, products, orders, tickets)
+- **Storage:** Firebase Storage (product images)
+- **Payments:** Stripe (test mode)
+- **Images:** Coil; AI-generated / stock flower photos
+- **Min SDK** 24 · **Target/Compile** 35 · JDK 17 · AGP 8.7 · Gradle 8.9
 
 ---
 
 ## 🏛️ Architecture (MVVM)
 
 ```
-┌──────────────────────────────┐
-│  UI (Composable screens)     │   Today / Habits / AddEdit / Stats
-│  observe StateFlow, emit      │
-│  user events                  │
-└───────────────┬──────────────┘
-                │  events ▲ state
-┌───────────────▼──────────────┐
-│  HabitViewModel               │   exposes HabitUiState (StateFlow),
-│  (AndroidViewModel)           │   handles add/edit/delete/toggle,
-│                               │   keeps reminders in sync
-└───────────────┬──────────────┘
-                │
-┌───────────────▼──────────────┐        ┌────────────────────────┐
-│  HabitRepository              │───────▶│ Firebase Realtime DB    │
-│  (single source of truth)     │◀───────│  /habits/{id}           │
-└───────────────┬──────────────┘        └────────────────────────┘
-                │
-┌───────────────▼──────────────┐
-│  ReminderScheduler            │   schedules daily AlarmManager
-│  + ReminderReceiver           │   alarms → local notifications
-└──────────────────────────────┘
+Composable screens  ──events──▶  ViewModel (StateFlow)  ──▶  Repository  ──▶  Firebase
+       ▲                                                                        │
+       └──────────────────────────  UI state  ◀────────────────────────────────┘
 ```
 
-The UI never touches Firebase directly — it only reads `HabitUiState` and calls
-`HabitViewModel` functions. The repository converts Realtime Database snapshots into a
-reactive `Flow<List<Habit>>`, so the UI updates the instant the cloud data changes.
+`SessionViewModel` exposes a single `SessionState` (Loading / SignedOut / SignedIn(user))
+that the whole app reacts to, so auth and role routing are fully reactive.
 
 ---
 
-## 📁 Project structure
+## 🚧 Build status (phased)
 
-```
-app/src/main/java/ge/btu/habittracker/
-├── HabitApplication.kt          # Firebase persistence + notification channel
-├── MainActivity.kt              # single Activity, hosts Compose
-├── data/
-│   ├── model/Habit.kt           # data class stored in Firebase
-│   ├── model/HabitStats.kt      # streak / completion-rate helpers
-│   ├── util/DateUtils.kt        # date keys & labels
-│   └── repository/HabitRepository.kt   # Firebase Realtime Database access
-├── notifications/               # ← the "new" feature
-│   ├── NotificationHelper.kt    # channel + posting notifications
-│   ├── ReminderScheduler.kt     # AlarmManager scheduling
-│   ├── ReminderReceiver.kt      # fires the notification
-│   └── BootReceiver.kt          # re-schedules after reboot
-└── ui/
-    ├── HabitTrackerApp.kt       # Scaffold + bottom-nav menu + NavHost
-    ├── HabitViewModel.kt        # MVVM ViewModel
-    ├── navigation/Destination.kt
-    ├── components/              # reusable UI (badges, headers, empty states)
-    ├── today/TodayScreen.kt
-    ├── habits/HabitsScreen.kt
-    ├── habits/AddEditHabitScreen.kt
-    └── stats/StatsScreen.kt
-```
+- [x] **Phase 1 — Foundation:** Firebase Auth (email + Google), role-based routing, session state
+- [ ] **Phase 2 — Catalog & cart:** product list/detail, admin product CRUD, images, cart
+- [ ] **Phase 3 — Checkout & orders:** Stripe test payment, orders, customer tracking, courier flow, admin live orders
+- [ ] **Phase 4 — Admin statistics + complaint tickets**
+- [ ] **Phase 5 (stretch):** live courier map tracking + real-time chat
 
 ---
 
-## 🔔 The "new" feature: scheduled local notifications
+## 🔧 Setup
 
-Each habit can carry a daily reminder. When you enable it and pick a time:
+### Firebase
+1. Create a Firebase project at https://console.firebase.google.com/.
+2. **Authentication** → enable **Email/Password** and **Google**.
+3. **Firestore Database** → create (test mode).
+4. **Storage** → get started (test mode).
+5. **Project settings → Your apps → Android**, package **`ge.btu.flowershop`**, add the debug
+   **SHA-1**, then download **`google-services.json`** into **`app/`**.
 
-1. `HabitViewModel.saveHabit()` calls `ReminderScheduler.sync(habit)`.
-2. `ReminderScheduler` registers a **repeating daily** alarm with `AlarmManager`
-   (`setInexactRepeating`, so no special exact-alarm permission is required).
-3. When the alarm fires, `ReminderReceiver` posts a notification through
-   `NotificationHelper`.
-4. `BootReceiver` re-creates all alarms after a device reboot.
+### Stripe (test mode)
+- Create a Stripe account, stay in **Test mode**, grab the **publishable** (`pk_test_…`) key.
+  (Used in Phase 3 with a small backend that holds the secret key.)
 
-On Android 13+ the app requests the `POST_NOTIFICATIONS` runtime permission on first launch.
-
----
-
-## 🔥 Firebase setup (required to run)
-
-The app needs an `app/google-services.json` file from your own Firebase project:
-
-1. Open the [Firebase console](https://console.firebase.google.com/) and **Add project**.
-2. Inside the project, **Add app → Android**. Use the package name **`ge.btu.habittracker`**.
-3. Download the generated **`google-services.json`** and place it in the **`app/`** folder.
-4. In the console, go to **Build → Realtime Database → Create database** (start in **test mode**
-   for development).
-5. Re-download `google-services.json` if the database URL was added after you first downloaded it.
-
-> Until `google-services.json` is added the app still launches and shows a
-> "Firebase isn't connected" banner instead of crashing.
-
----
-
-## ▶️ Build & run
-
-**Requirements:** JDK 17, Android SDK (platform 35, build-tools 35), an emulator or device.
-
+### Build & run
 ```bash
-# Build the debug APK from the command line
-./gradlew :app:assembleDebug
-
-# Install on a connected device / running emulator
-./gradlew :app:installDebug
+./gradlew :app:assembleDebug      # build
+./gradlew :app:installDebug       # install on device/emulator
 ```
-
-Or open the project in **Android Studio** and press **Run**.
+The app compiles and runs **before** Firebase is configured (it shows a "Firebase isn't
+configured" banner); add `google-services.json` to enable login and data.
 
 ---
 
-## ✅ Requirements checklist
+## ✅ Exam requirements mapping
 
-- [x] Menu (bottom navigation)
-- [x] List (`LazyColumn`)
-- [x] MVVM architecture
-- [x] Database connection (Firebase Realtime Database)
-- [x] A feature we hadn't used before (scheduled local notifications)
-- [x] README with description, technical details and content
-- [x] 100% Kotlin + Jetpack Compose — **no XML layouts, no `findViewById`**
-- [x] Uploaded to git in full (no `.zip` / `.rar`)
+- **Menu** → bottom navigation per role · **List** → `LazyColumn` (products, orders, …)
+- **MVVM** → ViewModel + Repository + StateFlow
+- **Database** → Firebase Firestore + Storage
+- **New feature** → Stripe online payments + (later) live courier tracking
+- **README** → this file · **Kotlin + Compose only**, no XML/`findViewById`
