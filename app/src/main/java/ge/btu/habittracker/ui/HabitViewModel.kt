@@ -1,6 +1,7 @@
 package ge.btu.habittracker.ui
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import ge.btu.habittracker.data.model.Habit
@@ -46,27 +47,37 @@ class HabitViewModel(application: Application) : AndroidViewModel(application) {
         val todayKey = DateUtils.todayKey()
         val markDone = habit.completions[todayKey] != true
         viewModelScope.launch {
-            repository.setCompletion(habit.id, todayKey, markDone)
+            // runCatching keeps a network/Firebase failure from crashing the app.
+            runCatching { repository.setCompletion(habit.id, todayKey, markDone) }
+                .onFailure { Log.e(TAG, "toggleToday failed", it) }
         }
     }
 
     /** Create a new habit (blank id) or update an existing one, then sync its reminder. */
     fun saveHabit(habit: Habit) {
         viewModelScope.launch {
-            if (habit.id.isBlank()) {
-                val newId = repository.addHabit(habit.copy(createdAt = System.currentTimeMillis()))
-                scheduler.sync(habit.copy(id = newId))
-            } else {
-                repository.updateHabit(habit)
-                scheduler.sync(habit)
-            }
+            runCatching {
+                if (habit.id.isBlank()) {
+                    val newId = repository.addHabit(habit.copy(createdAt = System.currentTimeMillis()))
+                    scheduler.sync(habit.copy(id = newId))
+                } else {
+                    repository.updateHabit(habit)
+                    scheduler.sync(habit)
+                }
+            }.onFailure { Log.e(TAG, "saveHabit failed", it) }
         }
     }
 
     fun deleteHabit(habit: Habit) {
         viewModelScope.launch {
-            repository.deleteHabit(habit.id)
-            scheduler.cancel(habit.id)
+            runCatching {
+                repository.deleteHabit(habit.id)
+                scheduler.cancel(habit.id)
+            }.onFailure { Log.e(TAG, "deleteHabit failed", it) }
         }
+    }
+
+    private companion object {
+        const val TAG = "HabitViewModel"
     }
 }
