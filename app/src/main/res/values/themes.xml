@@ -1,0 +1,4 @@
+<resources>
+    <!-- A bare NoActionBar base theme; all real styling is done in Compose (Material 3). -->
+    <style name="Theme.HabitTracker" parent="android:Theme.Material.Light.NoActionBar" />
+</resources>

@@ -1,0 +1,24 @@
+# Claude Code
+.claude/
+
+# Gradle / build
+.gradle/
+.kotlin/
+build/
+/app/build/
+/captures
+.externalNativeBuild
+.cxx
+
+# Local config (machine-specific SDK path)
+local.properties
+
+# IDE
+.idea/
+*.iml
+
+# OS
+.DS_Store
+
+# NOTE: app/google-services.json IS committed on purpose — it holds the public
+# Firebase client config the app needs to build/run, protected by DB security rules.
