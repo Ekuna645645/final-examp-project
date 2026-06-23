@@ -2,6 +2,7 @@ package ge.btu.flowershop.ui.auth
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,6 +16,8 @@ import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -33,11 +36,17 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import ge.btu.flowershop.data.model.UserRole
 import ge.btu.flowershop.ui.common.BloomLogo
 import ge.btu.flowershop.ui.common.FirebaseWarningBanner
 
 @Composable
-fun LoginScreen(viewModel: AuthViewModel, onNavigateToRegister: () -> Unit) {
+fun LoginScreen(
+    viewModel: AuthViewModel,
+    onNavigateToRegister: () -> Unit,
+    showPreview: Boolean = false,
+    onPreview: (UserRole) -> Unit = {},
+) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -113,6 +122,31 @@ fun LoginScreen(viewModel: AuthViewModel, onNavigateToRegister: () -> Unit) {
         if (state.isLoading) {
             Spacer(Modifier.height(16.dp))
             CircularProgressIndicator()
+        }
+
+        if (showPreview) {
+            Spacer(Modifier.height(28.dp))
+            HorizontalDivider()
+            Spacer(Modifier.height(12.dp))
+            Text(
+                "Developer preview (before Firebase)",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(Modifier.height(8.dp))
+            Row(
+                Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                UserRole.entries.forEach { role ->
+                    FilledTonalButton(onClick = { onPreview(role) }, modifier = Modifier.weight(1f)) {
+                        Text(
+                            role.name.lowercase().replaceFirstChar { it.uppercase() },
+                            style = MaterialTheme.typography.labelMedium,
+                        )
+                    }
+                }
+            }
         }
     }
 }

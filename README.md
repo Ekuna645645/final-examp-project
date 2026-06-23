@@ -52,7 +52,7 @@ that the whole app reacts to, so auth and role routing are fully reactive.
 ## 🚧 Build status (phased)
 
 - [x] **Phase 1 — Foundation:** Firebase Auth (email + Google), role-based routing, session state
-- [ ] **Phase 2 — Catalog & cart:** product list/detail, admin product CRUD, images, cart
+- [x] **Phase 2 — Catalog & cart:** product list/detail, admin product CRUD, images (Coil), cart
 - [ ] **Phase 3 — Checkout & orders:** Stripe test payment, orders, customer tracking, courier flow, admin live orders
 - [ ] **Phase 4 — Admin statistics + complaint tickets**
 - [ ] **Phase 5 (stretch):** live courier map tracking + real-time chat

@@ -1,39 +1,49 @@
-# final-examp-project — Android Habit Tracker (Vibe Coding Exam)
+# final-examp-project — "Bloom" Flower Delivery App (Vibe Coding Exam)
 
-Kotlin + Jetpack Compose habit/reminder tracker built for the "Mobile Application
-Development (Android)" final exam. This file is the contract for how the project is
-built — follow it exactly.
+Kotlin + Jetpack Compose multi-role flower-delivery marketplace for the "Mobile Application
+Development (Android)" final exam. This file is the contract — follow it exactly.
+
+> The earlier **Habit Tracker** version of this exam lives on branch `habit-tracker-backup`.
+> `main` is now Bloom.
 
 ## ⛔ Hard rules (breaking any of these ZEROES the grade)
-- **100% Jetpack Compose. NO XML layouts for UI. ABSOLUTELY NO `findViewById` anywhere.**
-  The grader explicitly said: the moment they see `findViewById`, the work is nullified.
+- **100% Jetpack Compose. NO XML layouts for UI. ABSOLUTELY NO `findViewById`.**
 - **Kotlin only.**
-- Project must be uploaded to **git in full** — no `.zip` / `.rar`.
+- Project uploaded to **git in full** — no `.zip` / `.rar`.
 
-## ✅ Required features (every one must be present and demonstrable)
-1. **A menu** → Compose bottom navigation bar.
-2. **A list** → `LazyColumn`.
-3. **MVVM architecture** → Composable screen ← ViewModel (StateFlow) ← Repository ← Firebase.
-4. **A database connection** → **Firebase Realtime Database**.
-5. **One feature not used in class before** → **scheduled local notifications** (daily habit reminders).
-6. **README** describing the app, its technical details, and its content.
+## App overview
+Three roles, routed after login by `users/{uid}.role` in Firestore:
+- **Customer** — browse flowers, cart, delivery address, pay (Stripe test), track orders, history, complaint tickets.
+- **Courier** — accept orders, pick up, deliver (live tracking + chat are a later phase).
+- **Admin** — product CRUD, manage users, live orders, statistics dashboard, complaint tickets.
 
 ## Stack & conventions
-- Jetpack Compose + Material 3.
-- MVVM with Repository pattern; UI state via `StateFlow` / Compose `State`.
-- Navigation Compose for the bottom-nav menu.
-- Kotlin Coroutines + Flow for async work.
-- Firebase Realtime Database (`google-services.json` lives in `app/`).
-- Reminders: `AlarmManager` + `BroadcastReceiver` + `NotificationManager` (POST_NOTIFICATIONS permission on Android 13+).
-- Versions: `minSdk 24`, `compileSdk/targetSdk 35`, JDK 17, Kotlin 2.x, AGP 8.x.
-- Package: `ge.btu.habittracker`.
+- Jetpack Compose + Material 3; brand theme (rose pink + leaf green), package `ge.btu.flowershop`.
+- MVVM: Composable ← ViewModel (StateFlow) ← Repository ← Firebase.
+- Navigation Compose; bottom-nav menu per role.
+- Firebase **Auth** (email + Google), **Firestore** (users/products/orders/tickets), **Storage** (images).
+- Payments: **Stripe test mode** (Phase 3; needs a small backend holding the secret key).
+- Images: Coil; demo catalog uses Unsplash CDN URLs (Higgsfield was out of credits).
+- Repos guard against a missing Firebase config so the app builds/runs before setup; the
+  login screen shows a dev "Preview as <role>" shortcut while `google-services.json` is absent.
+- Versions: minSdk 24, compile/target 35, JDK 17, Kotlin 2.0.21, AGP 8.7, Gradle 8.9.
+
+## Build phases
+1. ✅ Foundation — auth + role routing
+2. ✅ Catalog & cart — product list/detail, admin product CRUD, cart
+3. ⏳ Checkout (Stripe) + orders + courier flow
+4. ⏳ Admin statistics + complaint tickets
+5. ⏳ (stretch) live courier map tracking + real-time chat
 
 ## Build & run (local, headless)
-- JDK 17: Homebrew `openjdk@17`.
-- Android SDK: `android-commandlinetools`; `ANDROID_HOME` set in shell + `local.properties`.
-- Build: `./gradlew assembleDebug`
-- Firebase requires `app/google-services.json` from the Firebase console.
+- JDK 17: Homebrew `openjdk@17` (`JAVA_HOME=/opt/homebrew/opt/openjdk@17`).
+- Android SDK at `~/Library/Android/sdk`; build: `./gradlew :app:assembleDebug`.
+- **Emulator:** AVD `exam_pixel_api35`. Launch WITH a DNS server or it has no internet
+  (images/Firebase fail):
+  `$ANDROID_HOME/emulator/emulator -avd exam_pixel_api35 -dns-server 8.8.8.8,8.8.4.4`
+- Firebase needs `app/google-services.json` (added late, per the user's plan).
+- Debug SHA-1 (for Google sign-in): `66:7E:C1:F3:69:F7:8E:58:BD:E5:37:02:2E:07:82:04:F0:A1:0E:64`.
 
 ## Git
 - `origin` = friend's GitHub repo `https://github.com/Ekuna645645/final-examp-project.git`
-  (HTTPS + her access token; commits are attributed to her account by design).
+  (HTTPS + her token; commits attributed to her by design).

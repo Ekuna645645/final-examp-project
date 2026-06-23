@@ -104,6 +104,28 @@ fun EmptyState(
     }
 }
 
+/** Large screen title with an optional subtitle. */
+@Composable
+fun ScreenHeader(title: String, subtitle: String? = null, modifier: Modifier = Modifier) {
+    Column(modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 16.dp)) {
+        Text(title, style = MaterialTheme.typography.headlineMedium)
+        if (subtitle != null) {
+            Spacer(Modifier.height(2.dp))
+            Text(
+                subtitle,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    }
+}
+
+/** Placeholder for features arriving in a later phase. */
+@Composable
+fun ComingSoon(title: String, message: String, modifier: Modifier = Modifier) {
+    EmptyState(title = title, message = message, icon = Icons.Filled.LocalFlorist, modifier = modifier)
+}
+
 /** Title-cased label for a role enum name, e.g. "CUSTOMER" -> "Customer". */
 fun roleLabel(roleName: String): String =
     roleName.lowercase().replaceFirstChar { it.uppercase() }
