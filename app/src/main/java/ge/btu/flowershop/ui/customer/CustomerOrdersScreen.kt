@@ -9,12 +9,17 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.automirrored.outlined.ReceiptLong
 import androidx.compose.material3.Card
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -33,7 +38,7 @@ import ge.btu.flowershop.ui.components.OrderStatusTimeline
 
 /** "Orders" tab: the customer's current and past orders with a live status timeline. */
 @Composable
-fun CustomerOrdersScreen(orderViewModel: OrderViewModel, user: AppUser) {
+fun CustomerOrdersScreen(orderViewModel: OrderViewModel, user: AppUser, onOpenChat: (Order) -> Unit) {
     val ordersFlow = remember(user.uid) { orderViewModel.ordersForCustomer(user.uid) }
     val orders by ordersFlow.collectAsStateWithLifecycle(initialValue = emptyList())
 
@@ -50,14 +55,16 @@ fun CustomerOrdersScreen(orderViewModel: OrderViewModel, user: AppUser) {
                 contentPadding = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                items(orders, key = { it.id }) { order -> CustomerOrderCard(order) }
+                items(orders, key = { it.id }) { order ->
+                    CustomerOrderCard(order, onOpenChat = { onOpenChat(order) })
+                }
             }
         }
     }
 }
 
 @Composable
-private fun CustomerOrderCard(order: Order) {
+private fun CustomerOrderCard(order: Order, onOpenChat: () -> Unit) {
     Card(Modifier.fillMaxWidth()) {
         Column(Modifier.fillMaxWidth().padding(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -79,6 +86,15 @@ private fun CustomerOrderCard(order: Order) {
             }
             Spacer(Modifier.height(14.dp))
             OrderStatusTimeline(order.orderStatus)
+            // Chat unlocks once a courier has accepted the order.
+            if (order.courierId.isNotBlank() && order.orderStatus != ge.btu.flowershop.data.model.OrderStatus.CANCELLED) {
+                Spacer(Modifier.height(8.dp))
+                OutlinedButton(onClick = onOpenChat) {
+                    Icon(Icons.AutoMirrored.Filled.Chat, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(Modifier.width(8.dp))
+                    Text("Chat with courier")
+                }
+            }
         }
     }
 }

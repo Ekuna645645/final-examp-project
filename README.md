@@ -55,7 +55,8 @@ that the whole app reacts to, so auth and role routing are fully reactive.
 - [x] **Phase 2 — Catalog & cart:** product list/detail, admin product CRUD, images (Coil), cart
 - [x] **Phase 3 — Checkout & orders:** Stripe-test checkout, order placement, customer tracking, courier accept/deliver flow, admin live-order board
 - [x] **Phase 4 — Admin statistics + complaint tickets**
-- [ ] **Phase 5 (stretch):** real-time chat (customer ↔ courier) + live courier map tracking (needs a Google Maps API key)
+- [x] **Phase 5a — Real-time chat:** per-order chat between customer and courier
+- [ ] **Phase 5b — Live courier map tracking:** the only remaining item — needs a **Google Maps API key** (external setup, like Firebase). The order/courier data it would draw on is already in place.
 
 ---
 

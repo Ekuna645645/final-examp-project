@@ -26,10 +26,12 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import ge.btu.flowershop.data.model.AppUser
 import ge.btu.flowershop.ui.CartViewModel
+import ge.btu.flowershop.ui.ChatViewModel
 import ge.btu.flowershop.ui.OrderViewModel
 import ge.btu.flowershop.ui.ProductViewModel
 import ge.btu.flowershop.ui.TicketViewModel
 import ge.btu.flowershop.ui.common.AccountScreen
+import ge.btu.flowershop.ui.common.ChatScreen
 
 private data class CustomerTab(val route: String, val label: String, val icon: ImageVector)
 
@@ -42,6 +44,7 @@ fun CustomerHome(
     cartViewModel: CartViewModel = viewModel(),
     orderViewModel: OrderViewModel = viewModel(),
     ticketViewModel: TicketViewModel = viewModel(),
+    chatViewModel: ChatViewModel = viewModel(),
 ) {
     val navController = rememberNavController()
     val cartItems by cartViewModel.items.collectAsStateWithLifecycle()
@@ -130,7 +133,20 @@ fun CustomerHome(
                 )
             }
             composable("orders") {
-                CustomerOrdersScreen(orderViewModel = orderViewModel, user = user)
+                CustomerOrdersScreen(
+                    orderViewModel = orderViewModel,
+                    user = user,
+                    onOpenChat = { navController.navigate("chat/${it.id}") },
+                )
+            }
+            composable("chat/{orderId}") { entry ->
+                ChatScreen(
+                    orderId = entry.arguments?.getString("orderId").orEmpty(),
+                    title = "Chat with courier",
+                    user = user,
+                    chatViewModel = chatViewModel,
+                    onBack = { navController.popBackStack() },
+                )
             }
             composable("account") {
                 AccountScreen(

@@ -21,8 +21,10 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import ge.btu.flowershop.data.model.AppUser
+import ge.btu.flowershop.ui.ChatViewModel
 import ge.btu.flowershop.ui.OrderViewModel
 import ge.btu.flowershop.ui.common.AccountScreen
+import ge.btu.flowershop.ui.common.ChatScreen
 
 private data class CourierTab(val route: String, val label: String, val icon: ImageVector)
 
@@ -32,6 +34,7 @@ fun CourierHome(
     user: AppUser,
     onSignOut: () -> Unit,
     orderViewModel: OrderViewModel = viewModel(),
+    chatViewModel: ChatViewModel = viewModel(),
 ) {
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
@@ -42,11 +45,13 @@ fun CourierHome(
         CourierTab("deliveries", "Deliveries", Icons.Filled.LocalShipping),
         CourierTab("account", "Account", Icons.Filled.Person),
     )
+    val showBottomBar = tabs.any { it.route == currentRoute }
 
     Scaffold(
         bottomBar = {
-            NavigationBar {
-                tabs.forEach { tab ->
+            if (showBottomBar) {
+                NavigationBar {
+                    tabs.forEach { tab ->
                     NavigationBarItem(
                         selected = currentRoute == tab.route,
                         onClick = {
@@ -59,6 +64,7 @@ fun CourierHome(
                         icon = { Icon(tab.icon, contentDescription = tab.label) },
                         label = { Text(tab.label) },
                     )
+                    }
                 }
             }
         },
@@ -69,8 +75,23 @@ fun CourierHome(
             modifier = Modifier.padding(padding),
         ) {
             composable("available") { CourierAvailableScreen(orderViewModel, user) }
-            composable("deliveries") { CourierDeliveriesScreen(orderViewModel, user) }
+            composable("deliveries") {
+                CourierDeliveriesScreen(
+                    orderViewModel = orderViewModel,
+                    user = user,
+                    onOpenChat = { navController.navigate("chat/${it.id}") },
+                )
+            }
             composable("account") { AccountScreen(user = user, onSignOut = onSignOut) }
+            composable("chat/{orderId}") { entry ->
+                ChatScreen(
+                    orderId = entry.arguments?.getString("orderId").orEmpty(),
+                    title = "Chat with customer",
+                    user = user,
+                    chatViewModel = chatViewModel,
+                    onBack = { navController.popBackStack() },
+                )
+            }
         }
     }
 }

@@ -9,14 +9,19 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.filled.LocalShipping
 import androidx.compose.material.icons.outlined.Inbox
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -72,7 +77,7 @@ fun CourierAvailableScreen(orderViewModel: OrderViewModel, user: AppUser) {
 
 /** Orders assigned to this courier, with pickup / deliver actions. */
 @Composable
-fun CourierDeliveriesScreen(orderViewModel: OrderViewModel, user: AppUser) {
+fun CourierDeliveriesScreen(orderViewModel: OrderViewModel, user: AppUser, onOpenChat: (Order) -> Unit) {
     val ordersFlow = remember(user.uid) { orderViewModel.ordersForCourier(user.uid) }
     val orders by ordersFlow.collectAsStateWithLifecycle(initialValue = emptyList())
 
@@ -110,6 +115,14 @@ fun CourierDeliveriesScreen(orderViewModel: OrderViewModel, user: AppUser) {
                                     }
                                 }
                                 else -> {}
+                            }
+                            if (!order.orderStatus.isTerminal) {
+                                Spacer(Modifier.height(8.dp))
+                                OutlinedButton(onClick = { onOpenChat(order) }) {
+                                    Icon(Icons.AutoMirrored.Filled.Chat, contentDescription = null, modifier = Modifier.size(18.dp))
+                                    Spacer(Modifier.width(8.dp))
+                                    Text("Chat with customer")
+                                }
                             }
                         }
                     }
