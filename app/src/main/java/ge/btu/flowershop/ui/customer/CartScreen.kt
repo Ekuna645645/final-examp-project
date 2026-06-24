@@ -81,7 +81,7 @@ fun CartScreen(cartViewModel: CartViewModel, onCheckout: () -> Unit) {
                         Text("Checkout")
                     }
                     Text(
-                        "Secure Stripe payment arrives in the next phase.",
+                        "Checkout uses Stripe test mode — no real charge.",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(top = 6.dp),

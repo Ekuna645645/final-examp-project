@@ -7,6 +7,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Inventory2
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.SupportAgent
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
@@ -26,18 +27,21 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import ge.btu.flowershop.data.model.AppUser
+import ge.btu.flowershop.ui.OrderViewModel
 import ge.btu.flowershop.ui.ProductViewModel
+import ge.btu.flowershop.ui.TicketViewModel
 import ge.btu.flowershop.ui.common.AccountScreen
-import ge.btu.flowershop.ui.common.ComingSoon
 
 private data class AdminTab(val route: String, val label: String, val icon: ImageVector)
 
-/** Admin experience: bottom-nav menu over Products / Orders / Stats / Account. */
+/** Admin experience: bottom-nav over Products / Orders / Tickets / Stats / Account. */
 @Composable
 fun AdminHome(
     user: AppUser,
     onSignOut: () -> Unit,
     productViewModel: ProductViewModel = viewModel(),
+    orderViewModel: OrderViewModel = viewModel(),
+    ticketViewModel: TicketViewModel = viewModel(),
 ) {
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
@@ -46,6 +50,7 @@ fun AdminHome(
     val tabs = listOf(
         AdminTab("products", "Products", Icons.Filled.Inventory2),
         AdminTab("orders", "Orders", Icons.AutoMirrored.Filled.ReceiptLong),
+        AdminTab("tickets", "Tickets", Icons.Filled.SupportAgent),
         AdminTab("stats", "Stats", Icons.Filled.BarChart),
         AdminTab("account", "Account", Icons.Filled.Person),
     )
@@ -106,10 +111,23 @@ fun AdminHome(
                 )
             }
             composable("orders") {
-                ComingSoon("Live orders", "The live order board arrives in Phase 3.")
+                AdminOrdersScreen(orderViewModel = orderViewModel, onOpen = { navController.navigate("order/$it") })
+            }
+            composable(
+                route = "order/{id}",
+                arguments = listOf(navArgument("id") { type = NavType.StringType }),
+            ) { entry ->
+                AdminOrderDetailScreen(
+                    orderId = entry.arguments?.getString("id").orEmpty(),
+                    orderViewModel = orderViewModel,
+                    onBack = { navController.popBackStack() },
+                )
+            }
+            composable("tickets") {
+                AdminTicketsScreen(ticketViewModel = ticketViewModel)
             }
             composable("stats") {
-                ComingSoon("Statistics", "The admin statistics dashboard arrives in Phase 4.")
+                AdminStatsScreen(orderViewModel = orderViewModel, productViewModel = productViewModel)
             }
             composable("account") {
                 AccountScreen(user = user, onSignOut = onSignOut)

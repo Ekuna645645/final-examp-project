@@ -26,9 +26,10 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import ge.btu.flowershop.data.model.AppUser
 import ge.btu.flowershop.ui.CartViewModel
+import ge.btu.flowershop.ui.OrderViewModel
 import ge.btu.flowershop.ui.ProductViewModel
+import ge.btu.flowershop.ui.TicketViewModel
 import ge.btu.flowershop.ui.common.AccountScreen
-import ge.btu.flowershop.ui.common.ComingSoon
 
 private data class CustomerTab(val route: String, val label: String, val icon: ImageVector)
 
@@ -39,6 +40,8 @@ fun CustomerHome(
     onSignOut: () -> Unit,
     productViewModel: ProductViewModel = viewModel(),
     cartViewModel: CartViewModel = viewModel(),
+    orderViewModel: OrderViewModel = viewModel(),
+    ticketViewModel: TicketViewModel = viewModel(),
 ) {
     val navController = rememberNavController()
     val cartItems by cartViewModel.items.collectAsStateWithLifecycle()
@@ -109,13 +112,39 @@ fun CustomerHome(
                 )
             }
             composable("cart") {
-                CartScreen(cartViewModel = cartViewModel, onCheckout = { /* Stripe in Phase 3 */ })
+                CartScreen(cartViewModel = cartViewModel, onCheckout = { navController.navigate("checkout") })
+            }
+            composable("checkout") {
+                CheckoutScreen(
+                    items = cartItems,
+                    user = user,
+                    orderViewModel = orderViewModel,
+                    onBack = { navController.popBackStack() },
+                    onPlaced = {
+                        cartViewModel.clear()
+                        navController.navigate("orders") {
+                            popUpTo("shop")
+                            launchSingleTop = true
+                        }
+                    },
+                )
             }
             composable("orders") {
-                ComingSoon("Your orders", "Order tracking and history arrive in the next phase.")
+                CustomerOrdersScreen(orderViewModel = orderViewModel, user = user)
             }
             composable("account") {
-                AccountScreen(user = user, onSignOut = onSignOut)
+                AccountScreen(
+                    user = user,
+                    onSignOut = onSignOut,
+                    onSupport = { navController.navigate("tickets") },
+                )
+            }
+            composable("tickets") {
+                CustomerTicketsScreen(
+                    ticketViewModel = ticketViewModel,
+                    user = user,
+                    onBack = { navController.popBackStack() },
+                )
             }
         }
     }

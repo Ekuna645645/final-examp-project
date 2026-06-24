@@ -31,9 +31,12 @@ Three roles, routed after login by `users/{uid}.role` in Firestore:
 ## Build phases
 1. ✅ Foundation — auth + role routing
 2. ✅ Catalog & cart — product list/detail, admin product CRUD, cart
-3. ⏳ Checkout (Stripe) + orders + courier flow
-4. ⏳ Admin statistics + complaint tickets
-5. ⏳ (stretch) live courier map tracking + real-time chat
+3. ✅ Checkout (Stripe-test) + orders + customer tracking + courier flow + admin live orders
+4. ✅ Admin statistics + complaint tickets
+5. ⏳ (stretch) real-time chat + live courier map tracking (map needs a Google Maps API key)
+
+Orders/tickets degrade to an in-memory store (`LocalOrderStore`/`LocalTicketStore`) before
+Firebase exists, so the whole flow is demoable across role previews in one app run.
 
 ## Build & run (local, headless)
 - JDK 17: Homebrew `openjdk@17` (`JAVA_HOME=/opt/homebrew/opt/openjdk@17`).
