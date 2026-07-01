@@ -16,6 +16,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.filled.LocalShipping
+import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.outlined.Inbox
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -77,7 +78,12 @@ fun CourierAvailableScreen(orderViewModel: OrderViewModel, user: AppUser) {
 
 /** Orders assigned to this courier, with pickup / deliver actions. */
 @Composable
-fun CourierDeliveriesScreen(orderViewModel: OrderViewModel, user: AppUser, onOpenChat: (Order) -> Unit) {
+fun CourierDeliveriesScreen(
+    orderViewModel: OrderViewModel,
+    user: AppUser,
+    onOpenChat: (Order) -> Unit,
+    onTrack: (Order) -> Unit,
+) {
     val ordersFlow = remember(user.uid) { orderViewModel.ordersForCourier(user.uid) }
     val orders by ordersFlow.collectAsStateWithLifecycle(initialValue = emptyList())
 
@@ -115,6 +121,14 @@ fun CourierDeliveriesScreen(orderViewModel: OrderViewModel, user: AppUser, onOpe
                                     }
                                 }
                                 else -> {}
+                            }
+                            if (order.orderStatus == OrderStatus.OUT_FOR_DELIVERY) {
+                                Spacer(Modifier.height(8.dp))
+                                OutlinedButton(onClick = { onTrack(order) }) {
+                                    Icon(Icons.Filled.Map, contentDescription = null, modifier = Modifier.size(18.dp))
+                                    Spacer(Modifier.width(8.dp))
+                                    Text("Live map & share location")
+                                }
                             }
                             if (!order.orderStatus.isTerminal) {
                                 Spacer(Modifier.height(8.dp))

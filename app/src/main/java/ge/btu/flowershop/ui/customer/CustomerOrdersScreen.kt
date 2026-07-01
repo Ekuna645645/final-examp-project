@@ -16,6 +16,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.automirrored.outlined.ReceiptLong
+import androidx.compose.material.icons.filled.Map
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -38,7 +40,12 @@ import ge.btu.flowershop.ui.components.OrderStatusTimeline
 
 /** "Orders" tab: the customer's current and past orders with a live status timeline. */
 @Composable
-fun CustomerOrdersScreen(orderViewModel: OrderViewModel, user: AppUser, onOpenChat: (Order) -> Unit) {
+fun CustomerOrdersScreen(
+    orderViewModel: OrderViewModel,
+    user: AppUser,
+    onOpenChat: (Order) -> Unit,
+    onTrack: (Order) -> Unit,
+) {
     val ordersFlow = remember(user.uid) { orderViewModel.ordersForCustomer(user.uid) }
     val orders by ordersFlow.collectAsStateWithLifecycle(initialValue = emptyList())
 
@@ -60,13 +67,13 @@ fun CustomerOrdersScreen(orderViewModel: OrderViewModel, user: AppUser, onOpenCh
                 if (active.isNotEmpty()) {
                     item { SectionLabel("Active") }
                     items(active, key = { it.id }) { order ->
-                        CustomerOrderCard(order, onOpenChat = { onOpenChat(order) })
+                        CustomerOrderCard(order, onOpenChat = { onOpenChat(order) }, onTrack = { onTrack(order) })
                     }
                 }
                 if (past.isNotEmpty()) {
                     item { SectionLabel("History") }
                     items(past, key = { it.id }) { order ->
-                        CustomerOrderCard(order, onOpenChat = { onOpenChat(order) })
+                        CustomerOrderCard(order, onOpenChat = { onOpenChat(order) }, onTrack = { onTrack(order) })
                     }
                 }
             }
@@ -85,7 +92,7 @@ private fun SectionLabel(text: String) {
 }
 
 @Composable
-private fun CustomerOrderCard(order: Order, onOpenChat: () -> Unit) {
+private fun CustomerOrderCard(order: Order, onOpenChat: () -> Unit, onTrack: () -> Unit) {
     Card(Modifier.fillMaxWidth()) {
         Column(Modifier.fillMaxWidth().padding(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -107,6 +114,15 @@ private fun CustomerOrderCard(order: Order, onOpenChat: () -> Unit) {
             }
             Spacer(Modifier.height(14.dp))
             OrderStatusTimeline(order.orderStatus)
+            // Live map tracking while the courier is en route.
+            if (order.orderStatus == ge.btu.flowershop.data.model.OrderStatus.OUT_FOR_DELIVERY) {
+                Spacer(Modifier.height(8.dp))
+                Button(onClick = onTrack) {
+                    Icon(Icons.Filled.Map, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(Modifier.width(8.dp))
+                    Text("Track on map")
+                }
+            }
             // Chat unlocks once a courier has accepted the order.
             if (order.courierId.isNotBlank() && order.orderStatus != ge.btu.flowershop.data.model.OrderStatus.CANCELLED) {
                 Spacer(Modifier.height(8.dp))

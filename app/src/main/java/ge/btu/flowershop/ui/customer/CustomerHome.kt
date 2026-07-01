@@ -34,6 +34,7 @@ import ge.btu.flowershop.ui.ProductViewModel
 import ge.btu.flowershop.ui.TicketViewModel
 import ge.btu.flowershop.ui.common.AccountScreen
 import ge.btu.flowershop.ui.common.ChatScreen
+import ge.btu.flowershop.ui.common.LoadingScreen
 
 private data class CustomerTab(val route: String, val label: String, val icon: ImageVector)
 
@@ -144,6 +145,7 @@ fun CustomerHome(
                     orderViewModel = orderViewModel,
                     user = user,
                     onOpenChat = { navController.navigate("chat/${it.id}") },
+                    onTrack = { navController.navigate("track/${it.id}") },
                 )
             }
             composable("chat/{orderId}") { entry ->
@@ -154,6 +156,17 @@ fun CustomerHome(
                     chatViewModel = chatViewModel,
                     onBack = { navController.popBackStack() },
                 )
+            }
+            composable("track/{orderId}") { entry ->
+                val orderId = entry.arguments?.getString("orderId").orEmpty()
+                val ordersFlow = remember(user.uid) { orderViewModel.ordersForCustomer(user.uid) }
+                val orders by ordersFlow.collectAsStateWithLifecycle(initialValue = emptyList())
+                val order = orders.firstOrNull { it.id == orderId }
+                if (order != null) {
+                    CustomerTrackingScreen(order = order, onBack = { navController.popBackStack() })
+                } else {
+                    LoadingScreen()
+                }
             }
             composable("account") {
                 AccountScreen(

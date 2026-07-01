@@ -12,8 +12,10 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
@@ -25,6 +27,7 @@ import ge.btu.flowershop.ui.ChatViewModel
 import ge.btu.flowershop.ui.OrderViewModel
 import ge.btu.flowershop.ui.common.AccountScreen
 import ge.btu.flowershop.ui.common.ChatScreen
+import ge.btu.flowershop.ui.common.LoadingScreen
 
 private data class CourierTab(val route: String, val label: String, val icon: ImageVector)
 
@@ -80,6 +83,7 @@ fun CourierHome(
                     orderViewModel = orderViewModel,
                     user = user,
                     onOpenChat = { navController.navigate("chat/${it.id}") },
+                    onTrack = { navController.navigate("track/${it.id}") },
                 )
             }
             composable("account") { AccountScreen(user = user, onSignOut = onSignOut) }
@@ -91,6 +95,21 @@ fun CourierHome(
                     chatViewModel = chatViewModel,
                     onBack = { navController.popBackStack() },
                 )
+            }
+            composable("track/{orderId}") { entry ->
+                val orderId = entry.arguments?.getString("orderId").orEmpty()
+                val ordersFlow = remember(user.uid) { orderViewModel.ordersForCourier(user.uid) }
+                val orders by ordersFlow.collectAsStateWithLifecycle(initialValue = emptyList())
+                val order = orders.firstOrNull { it.id == orderId }
+                if (order != null) {
+                    CourierTrackingScreen(
+                        order = order,
+                        orderViewModel = orderViewModel,
+                        onBack = { navController.popBackStack() },
+                    )
+                } else {
+                    LoadingScreen()
+                }
             }
         }
     }

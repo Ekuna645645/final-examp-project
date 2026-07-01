@@ -54,6 +54,13 @@ class OrderViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun updateCourierLocation(orderId: String, lat: Double, lng: Double) {
+        viewModelScope.launch {
+            runCatching { repository.updateCourierLocation(orderId, lat, lng) }
+                .onFailure { Log.e(TAG, "updateCourierLocation failed", it) }
+        }
+    }
+
     private companion object {
         const val TAG = "OrderViewModel"
     }

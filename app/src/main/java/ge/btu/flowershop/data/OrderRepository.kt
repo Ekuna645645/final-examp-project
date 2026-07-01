@@ -102,6 +102,21 @@ class OrderRepository {
         ).await()
     }
 
+    /** Courier pushes their live GPS position onto the order being delivered. */
+    suspend fun updateCourierLocation(orderId: String, lat: Double, lng: Double) {
+        val now = System.currentTimeMillis()
+        val col = collection()
+        if (col == null) {
+            LocalOrderStore.update(orderId) {
+                it.copy(courierLat = lat, courierLng = lng, courierLocationAt = now)
+            }
+            return
+        }
+        col.document(orderId).update(
+            mapOf("courierLat" to lat, "courierLng" to lng, "courierLocationAt" to now),
+        ).await()
+    }
+
     private companion object {
         const val ORDERS = "orders"
     }

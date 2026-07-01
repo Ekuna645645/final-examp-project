@@ -81,6 +81,12 @@ dependencies {
     // Google Sign-In
     implementation("com.google.android.gms:play-services-auth:21.2.0")
 
+    // Location (FusedLocationProvider) for live courier tracking
+    implementation("com.google.android.gms:play-services-location:21.3.0")
+
+    // OpenStreetMap map (free, no API key) rendered via Compose AndroidView
+    implementation("org.osmdroid:osmdroid-android:6.1.20")
+
     // Image loading
     implementation("io.coil-kt:coil-compose:2.7.0")
 

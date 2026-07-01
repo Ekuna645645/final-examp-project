@@ -50,12 +50,18 @@ data class Order(
     val phone: String = "",
     val courierId: String = "",
     val courierName: String = "",
+    val courierLat: Double = 0.0,
+    val courierLng: Double = 0.0,
+    val courierLocationAt: Long = 0L,
     val paymentStatus: String = "PAID",
     val createdAt: Long = 0L,
     val updatedAt: Long = 0L,
 ) {
     @get:Exclude
     val orderStatus: OrderStatus get() = OrderStatus.from(status)
+
+    @get:Exclude
+    val hasCourierLocation: Boolean get() = courierLat != 0.0 || courierLng != 0.0
 
     @get:Exclude
     val itemCount: Int get() = items.sumOf { it.quantity }
