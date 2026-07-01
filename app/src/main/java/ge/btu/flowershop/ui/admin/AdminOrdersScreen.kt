@@ -163,10 +163,18 @@ fun AdminOrderDetailScreen(orderId: String, orderViewModel: OrderViewModel, onBa
             if (!order.orderStatus.isTerminal) {
                 val index = OrderStatus.pipeline.indexOf(order.orderStatus)
                 val next = OrderStatus.pipeline.getOrNull(index + 1)
-                if (next != null) {
+                // Only advance once a courier is assigned — otherwise the order would be
+                // orphaned (ACCEPTED with no courier drops out of every courier queue).
+                if (next != null && order.courierId.isNotBlank()) {
                     Button(onClick = { orderViewModel.setStatus(order.id, next) }, modifier = Modifier.fillMaxWidth()) {
                         Text("Advance to ${next.label}")
                     }
+                } else if (order.courierId.isBlank()) {
+                    Text(
+                        "Waiting for a courier to accept this order.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
                 }
                 OutlinedButton(
                     onClick = { orderViewModel.cancel(order.id) },

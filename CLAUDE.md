@@ -33,7 +33,11 @@ Three roles, routed after login by `users/{uid}.role` in Firestore:
 2. ✅ Catalog & cart — product list/detail, admin product CRUD, cart
 3. ✅ Checkout (Stripe-test) + orders + customer tracking + courier flow + admin live orders
 4. ✅ Admin statistics + complaint tickets
-5. ⏳ (stretch) real-time chat + live courier map tracking (map needs a Google Maps API key)
+5. ✅ real-time chat + live courier map tracking (OpenStreetMap/osmdroid + FusedLocation GPS)
+
+Firebase is connected (project `flowershop-9d803`, `app/google-services.json` committed);
+Firestore is seeded with the 6 demo products. Google Sign-In also needs the debug SHA-1
+registered in the Firebase console.
 
 Orders/tickets degrade to an in-memory store (`LocalOrderStore`/`LocalTicketStore`) before
 Firebase exists, so the whole flow is demoable across role previews in one app run.

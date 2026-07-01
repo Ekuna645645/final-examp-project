@@ -56,7 +56,7 @@ that the whole app reacts to, so auth and role routing are fully reactive.
 - [x] **Phase 3 — Checkout & orders:** Stripe-test checkout, order placement, customer tracking, courier accept/deliver flow, admin live-order board
 - [x] **Phase 4 — Admin statistics + complaint tickets**
 - [x] **Phase 5a — Real-time chat:** per-order chat between customer and courier
-- [ ] **Phase 5b — Live courier map tracking:** the only remaining item — needs a **Google Maps API key** (external setup, like Firebase). The order/courier data it would draw on is already in place.
+- [x] **Phase 5b — Live courier map tracking:** OpenStreetMap (osmdroid) + real GPS (FusedLocation) — the courier shares their live location, the customer watches them move on the map. No API key needed.
 
 ---
 

@@ -69,6 +69,7 @@ fun CheckoutScreen(
     var cvc by remember { mutableStateOf("123") }
     var processing by remember { mutableStateOf(false) }
     var saveAddress by remember { mutableStateOf(false) }
+    var error by remember { mutableStateOf<String?>(null) }
 
     Scaffold(
         topBar = {
@@ -180,9 +181,14 @@ fun CheckoutScreen(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
 
+            error?.let {
+                Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
+            }
+
             Button(
                 onClick = {
                     processing = true
+                    error = null
                     if (saveAddress) onSaveAddress(address.trim())
                     orderViewModel.placeOrder(
                         Order(
@@ -203,7 +209,14 @@ fun CheckoutScreen(
                             phone = phone.trim(),
                             paymentStatus = "PAID",
                         ),
-                    ) { onPlaced() }
+                    ) { success ->
+                        if (success) {
+                            onPlaced()
+                        } else {
+                            processing = false
+                            error = "Couldn't place the order. Check your connection and try again."
+                        }
+                    }
                 },
                 enabled = !processing && items.isNotEmpty() && address.isNotBlank(),
                 modifier = Modifier.fillMaxWidth(),

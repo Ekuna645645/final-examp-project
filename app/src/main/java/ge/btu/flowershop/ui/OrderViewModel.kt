@@ -30,11 +30,15 @@ class OrderViewModel(application: Application) : AndroidViewModel(application) {
     fun ordersForCustomer(uid: String): Flow<List<Order>> = repository.observeForCustomer(uid)
     fun ordersForCourier(uid: String): Flow<List<Order>> = repository.observeForCourier(uid)
 
-    fun placeOrder(order: Order, onPlaced: (String) -> Unit) {
+    /** Places the order; [onResult] gets true on success, false on failure (so the UI can recover). */
+    fun placeOrder(order: Order, onResult: (Boolean) -> Unit) {
         viewModelScope.launch {
             runCatching { repository.placeOrder(order) }
-                .onSuccess { onPlaced(it) }
-                .onFailure { Log.e(TAG, "placeOrder failed", it) }
+                .onSuccess { onResult(true) }
+                .onFailure {
+                    Log.e(TAG, "placeOrder failed", it)
+                    onResult(false)
+                }
         }
     }
 
