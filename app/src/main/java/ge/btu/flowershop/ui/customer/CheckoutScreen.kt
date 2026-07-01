@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -15,8 +16,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -53,6 +56,8 @@ fun CheckoutScreen(
     items: List<CartItem>,
     user: AppUser,
     orderViewModel: OrderViewModel,
+    savedAddresses: List<String>,
+    onSaveAddress: (String) -> Unit,
     onBack: () -> Unit,
     onPlaced: () -> Unit,
 ) {
@@ -63,6 +68,7 @@ fun CheckoutScreen(
     var expiry by remember { mutableStateOf("12 / 34") }
     var cvc by remember { mutableStateOf("123") }
     var processing by remember { mutableStateOf(false) }
+    var saveAddress by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -108,12 +114,30 @@ fun CheckoutScreen(
             }
 
             Text("Delivery details", style = MaterialTheme.typography.titleMedium)
+            if (savedAddresses.isNotEmpty()) {
+                Row(
+                    Modifier.horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    savedAddresses.forEach { saved ->
+                        FilterChip(
+                            selected = address == saved,
+                            onClick = { address = saved },
+                            label = { Text(saved) },
+                        )
+                    }
+                }
+            }
             OutlinedTextField(
                 value = address,
                 onValueChange = { address = it },
                 label = { Text("Delivery address") },
                 modifier = Modifier.fillMaxWidth(),
             )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Checkbox(checked = saveAddress, onCheckedChange = { saveAddress = it })
+                Text("Save this address for next time")
+            }
             OutlinedTextField(
                 value = phone,
                 onValueChange = { phone = it },
@@ -159,6 +183,7 @@ fun CheckoutScreen(
             Button(
                 onClick = {
                     processing = true
+                    if (saveAddress) onSaveAddress(address.trim())
                     orderViewModel.placeOrder(
                         Order(
                             customerId = user.uid,

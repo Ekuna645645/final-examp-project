@@ -51,16 +51,37 @@ fun CustomerOrdersScreen(orderViewModel: OrderViewModel, user: AppUser, onOpenCh
                 icon = Icons.AutoMirrored.Outlined.ReceiptLong,
             )
         } else {
+            val active = orders.filter { !it.orderStatus.isTerminal }
+            val past = orders.filter { it.orderStatus.isTerminal }
             LazyColumn(
                 contentPadding = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                items(orders, key = { it.id }) { order ->
-                    CustomerOrderCard(order, onOpenChat = { onOpenChat(order) })
+                if (active.isNotEmpty()) {
+                    item { SectionLabel("Active") }
+                    items(active, key = { it.id }) { order ->
+                        CustomerOrderCard(order, onOpenChat = { onOpenChat(order) })
+                    }
+                }
+                if (past.isNotEmpty()) {
+                    item { SectionLabel("History") }
+                    items(past, key = { it.id }) { order ->
+                        CustomerOrderCard(order, onOpenChat = { onOpenChat(order) })
+                    }
                 }
             }
         }
     }
+}
+
+@Composable
+private fun SectionLabel(text: String) {
+    Text(
+        text,
+        style = MaterialTheme.typography.titleSmall,
+        color = MaterialTheme.colorScheme.primary,
+        modifier = Modifier.padding(top = 4.dp, bottom = 2.dp),
+    )
 }
 
 @Composable

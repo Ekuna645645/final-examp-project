@@ -7,7 +7,8 @@
     <application
         android:name=".BloomApplication"
         android:allowBackup="true"
-        android:icon="@android:drawable/sym_def_app_icon"
+        android:icon="@drawable/ic_launcher_flower"
+        android:roundIcon="@drawable/ic_launcher_flower"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/Theme.Bloom">

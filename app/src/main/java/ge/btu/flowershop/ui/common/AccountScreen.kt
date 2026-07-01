@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.outlined.Group
 import androidx.compose.material.icons.outlined.SupportAgent
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Card
@@ -19,12 +21,19 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import ge.btu.flowershop.data.model.AppUser
 
-/** Shared profile screen for every role: identity, optional support entry, and sign out. */
+/** Shared profile screen for every role: identity, optional management entries, and sign out. */
 @Composable
-fun AccountScreen(user: AppUser, onSignOut: () -> Unit, onSupport: (() -> Unit)? = null) {
+fun AccountScreen(
+    user: AppUser,
+    onSignOut: () -> Unit,
+    onSupport: (() -> Unit)? = null,
+    onManageAddresses: (() -> Unit)? = null,
+    onManageUsers: (() -> Unit)? = null,
+) {
     Column(Modifier.fillMaxSize()) {
         ScreenHeader("Account")
         Card(Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
@@ -43,15 +52,16 @@ fun AccountScreen(user: AppUser, onSignOut: () -> Unit, onSupport: (() -> Unit)?
             }
         }
         Spacer(Modifier.height(24.dp))
+        if (onManageUsers != null) {
+            AccountAction(Icons.Outlined.Group, "Manage users", onManageUsers)
+            Spacer(Modifier.height(12.dp))
+        }
+        if (onManageAddresses != null) {
+            AccountAction(Icons.Filled.LocationOn, "Delivery addresses", onManageAddresses)
+            Spacer(Modifier.height(12.dp))
+        }
         if (onSupport != null) {
-            FilledTonalButton(
-                onClick = onSupport,
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-            ) {
-                Icon(Icons.Outlined.SupportAgent, contentDescription = null)
-                Spacer(Modifier.width(8.dp))
-                Text("Support tickets")
-            }
+            AccountAction(Icons.Outlined.SupportAgent, "Support tickets", onSupport)
             Spacer(Modifier.height(12.dp))
         }
         OutlinedButton(
@@ -62,5 +72,17 @@ fun AccountScreen(user: AppUser, onSignOut: () -> Unit, onSupport: (() -> Unit)?
             Spacer(Modifier.width(8.dp))
             Text("Sign out")
         }
+    }
+}
+
+@Composable
+private fun AccountAction(icon: ImageVector, label: String, onClick: () -> Unit) {
+    FilledTonalButton(
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+    ) {
+        Icon(icon, contentDescription = null)
+        Spacer(Modifier.width(8.dp))
+        Text(label)
     }
 }

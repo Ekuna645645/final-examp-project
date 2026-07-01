@@ -12,6 +12,7 @@ data class AppUser(
     val email: String = "",
     val role: String = UserRole.CUSTOMER.name,
     val phone: String = "",
+    val addresses: List<String> = emptyList(),
     val createdAt: Long = 0L,
 ) {
     @get:Exclude

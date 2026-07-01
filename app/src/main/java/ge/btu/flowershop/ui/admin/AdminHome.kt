@@ -30,6 +30,7 @@ import ge.btu.flowershop.data.model.AppUser
 import ge.btu.flowershop.ui.OrderViewModel
 import ge.btu.flowershop.ui.ProductViewModel
 import ge.btu.flowershop.ui.TicketViewModel
+import ge.btu.flowershop.ui.UsersViewModel
 import ge.btu.flowershop.ui.common.AccountScreen
 
 private data class AdminTab(val route: String, val label: String, val icon: ImageVector)
@@ -42,6 +43,7 @@ fun AdminHome(
     productViewModel: ProductViewModel = viewModel(),
     orderViewModel: OrderViewModel = viewModel(),
     ticketViewModel: TicketViewModel = viewModel(),
+    usersViewModel: UsersViewModel = viewModel(),
 ) {
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
@@ -130,7 +132,17 @@ fun AdminHome(
                 AdminStatsScreen(orderViewModel = orderViewModel, productViewModel = productViewModel)
             }
             composable("account") {
-                AccountScreen(user = user, onSignOut = onSignOut)
+                AccountScreen(
+                    user = user,
+                    onSignOut = onSignOut,
+                    onManageUsers = { navController.navigate("users") },
+                )
+            }
+            composable("users") {
+                AdminUsersScreen(
+                    usersViewModel = usersViewModel,
+                    onBack = { navController.popBackStack() },
+                )
             }
         }
     }

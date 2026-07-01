@@ -15,6 +15,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -25,6 +26,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import ge.btu.flowershop.data.model.AppUser
+import ge.btu.flowershop.ui.AddressViewModel
 import ge.btu.flowershop.ui.CartViewModel
 import ge.btu.flowershop.ui.ChatViewModel
 import ge.btu.flowershop.ui.OrderViewModel
@@ -45,10 +47,13 @@ fun CustomerHome(
     orderViewModel: OrderViewModel = viewModel(),
     ticketViewModel: TicketViewModel = viewModel(),
     chatViewModel: ChatViewModel = viewModel(),
+    addressViewModel: AddressViewModel = viewModel(),
 ) {
     val navController = rememberNavController()
     val cartItems by cartViewModel.items.collectAsStateWithLifecycle()
     val cartCount = cartItems.sumOf { it.quantity }
+    val savedAddressesFlow = remember(user.uid) { addressViewModel.addresses(user.uid) }
+    val savedAddresses by savedAddressesFlow.collectAsStateWithLifecycle(initialValue = emptyList())
 
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination?.route
@@ -122,6 +127,8 @@ fun CustomerHome(
                     items = cartItems,
                     user = user,
                     orderViewModel = orderViewModel,
+                    savedAddresses = savedAddresses,
+                    onSaveAddress = { addressViewModel.add(user.uid, it) },
                     onBack = { navController.popBackStack() },
                     onPlaced = {
                         cartViewModel.clear()
@@ -153,11 +160,19 @@ fun CustomerHome(
                     user = user,
                     onSignOut = onSignOut,
                     onSupport = { navController.navigate("tickets") },
+                    onManageAddresses = { navController.navigate("addresses") },
                 )
             }
             composable("tickets") {
                 CustomerTicketsScreen(
                     ticketViewModel = ticketViewModel,
+                    user = user,
+                    onBack = { navController.popBackStack() },
+                )
+            }
+            composable("addresses") {
+                CustomerAddressesScreen(
+                    addressViewModel = addressViewModel,
                     user = user,
                     onBack = { navController.popBackStack() },
                 )
